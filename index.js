@@ -7,7 +7,7 @@ keepAlive();
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
-const CHANNEL_ID = process.env.YOUR_CHANNEL_ID;
+const CHANNEL_ID = process.env.CHANNEL_ID;
 
 const foodMenus = {
   morning: {
