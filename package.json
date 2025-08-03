@@ -1,0 +1,21 @@
+{
+  "name": "discord-bot",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Discord bot for English to Thai keyboard typo translation",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "start": "node index.js"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "dependencies": {
+    "discord.js": "^14.11.0",
+    "express": "^4.18.2",
+    "dotenv": "^16.3.1"
+  }
+}
