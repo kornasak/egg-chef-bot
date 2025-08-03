@@ -20,7 +20,7 @@ for (const file of commandFiles) {
 
 // ส่งเมนูอัตโนมัติตามเวลา
 import schedule from "node-schedule";
-import { getMenuText } from "./menu.js";
+import { getMenuText } from "./commands/menu.js";
 
 // ใส่ ID ของช่องที่ต้องการให้ส่งเมนู
 const CHANNEL_ID = process.env.CHANNEL_ID;
