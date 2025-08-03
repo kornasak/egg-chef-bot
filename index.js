@@ -1,94 +1,57 @@
 import { keepAlive } from "./keepAlive.js";
-import { Client, GatewayIntentBits } from 'discord.js';
-import "dotenv/config";
+import { Client, GatewayIntentBits, Collection } from "discord.js";
+import dotenv from "dotenv";
+import fs from "fs";
+import path from "path";
 import pkg from "./package.json" with { type: "json" };
+
+dotenv.config();
 
 keepAlive();
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
+client.commands = new Collection();
+const commandFiles = fs.readdirSync("./commands").filter(file => file.endsWith(".js"));
+for (const file of commandFiles) {
+  const command = await import(`./commands/${file}`);
+  client.commands.set(command.default.data.name, command.default);
+}
+
+// ส่งเมนูอัตโนมัติตามเวลา
+import schedule from "node-schedule";
+import { getMenuText } from "./menu.js";
+
+// ใส่ ID ของช่องที่ต้องการให้ส่งเมนู
 const CHANNEL_ID = process.env.CHANNEL_ID;
 
-const foodMenus = {
-  morning: {
-    normal: [
-      { food: "ไข่กระทะ", drink: "นมถั่วเหลือง" },
-      { food: "ข้าวต้มหมู", drink: "ชาอุ่นๆ" },
-      { food: "แซนด์วิชทูน่า", drink: "น้ำผลไม้คั้นสด" },
-    ],
-    sick: [
-      { food: "โจ๊กปลา", drink: "น้ำอุ่น" },
-      { food: "ข้าวต้มไก่", drink: "เกลือแร่หรือน้ำขิง" },
-    ]
-  },
-  lunch: {
-    normal: [
-      { food: "ข้าวผัดกุ้ง", drink: "ชาเย็น" },
-      { food: "ข้าวกระเพราไก่", drink: "น้ำเปล่าเย็น" },
-      { food: "ข้าวมันไก่", drink: "น้ำซุปอุ่นๆ" },
-    ],
-    sick: [
-      { food: "ข้าวต้มหมูสับ", drink: "น้ำเกลือแร่" },
-      { food: "ต้มจืดเต้าหู้หมูสับ", drink: "น้ำอุ่น" },
-    ]
-  },
-  dinner: {
-    normal: [
-      { food: "ก๋วยจั๊บน้ำใส", drink: "น้ำบ๊วย" },
-      { food: "ข้าวเหนียวหมูปิ้ง", drink: "ชาเขียว" },
-      { food: "ต้มยำกุ้ง", drink: "น้ำเย็น" },
-    ],
-    sick: [
-      { food: "ต้มจืดฟักไก่", drink: "น้ำขิงอุ่น" },
-      { food: "ข้าวต้มปลา", drink: "น้ำเปล่า" },
-    ]
-  }
-};
-
-// ฟังก์ชันสุ่มเมนู
-function getRandomMenu(type) {
-  const item = menu[type][Math.floor(Math.random() * menu[type].length)];
-  return `🍽️ ${item.meal} + 🥤 ${item.drink}`;
-}
-
-// ส่งข้อความรวม
-async function sendMealSuggestion() {
+const sendMeal = async (mealTime) => {
   const channel = await client.channels.fetch(CHANNEL_ID);
   if (!channel) return;
+  const menu = getMenuText(mealTime);
+  channel.send(menu);
+};
 
-  const message = `📅 **เมนูแนะนำวันนี้**
+// ตั้งเวลา: 07:00, 12:00, 18:00
+schedule.scheduleJob("0 7 * * *", () => sendMeal("เช้า"));
+schedule.scheduleJob("0 12 * * *", () => sendMeal("กลางวัน"));
+schedule.scheduleJob("0 18 * * *", () => sendMeal("เย็น"));
 
-🌅 **มื้อเช้า:**  
-${getRandomMenu('breakfast')}
-
-🌞 **มื้อกลางวัน:**  
-${getRandomMenu('lunch')}
-
-🌙 **มื้อเย็น:**  
-${getRandomMenu('dinner')}
-
-🤒 **ถ้าไม่ค่อยสบาย:**  
-${getRandomMenu('sick')}
-
-ให้มื้อนี้อิ่มอร่อยและสุขภาพดีนะ~`;
-
-  channel.send(message);
-}
-
-// ตรวจเวลาทุกนาที
-setInterval(() => {
-  const now = new Date();
-  const hour = now.getHours();
-  const minute = now.getMinutes();
-
-  // ปรับตามเวลาเช้า 07:00, กลางวัน 12:00, เย็น 18:00
-  if ((hour === 7 || hour === 12 || hour === 18) && minute === 0) {
-    sendMealSuggestion();
+// สั่งงานคำสั่ง
+client.on("interactionCreate", async interaction => {
+  if (!interaction.isChatInputCommand()) return;
+  const command = client.commands.get(interaction.commandName);
+  if (!command) return;
+  try {
+    await command.execute(interaction);
+  } catch (error) {
+    console.error(error);
+    await interaction.reply({ content: "มีบางอย่างผิดพลาด!", ephemeral: true });
   }
-}, 60000);
+});
 
-client.once('ready', () => {
-  console.log(`✅ Logged in as ${client.user.tag}`);
+client.once("ready", () => {
+  console.log(`Logged in as ${client.user.tag}`);
 });
 
 client.login(process.env.TOKEN);
