@@ -42,7 +42,7 @@ client.once("ready", () => {
 
 // คำสั่ง /เมนูตอนนี้
 const mealCommand = new SlashCommandBuilder()
-  .setName("เมนูตอนนี้")
+  .setName("suggest")
   .setDescription("แนะนำเมนูอาหารสำหรับวันนี้แบบครบทุกมื้อ");
 
 const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
