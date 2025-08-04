@@ -2,6 +2,7 @@ import { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } from "di
 import dotenv from "dotenv";
 import { keepAlive } from "./keepAlive.js";
 import { breakfast, lunch, dinner, drinks, sickMenus } from "./menu.js";
+import pkg from "./package.json" with { type: "json" };
 
 dotenv.config();
 
@@ -38,6 +39,27 @@ client.once("ready", () => {
       }
     }
   }, 60 * 1000); // check every minute
+
+  const statuses = ["/suggest", "หิวเมื่อไหร่… หัวไข่จัดให้", "อยู่บ้านไม่รู้จะกินอะไร เรียกหัวไข่สิ!", "ทุกมื้อคือภารกิจ… ของหัวไข่"];
+  let statusIndex = 0;
+
+  // แสดง status ทันทีรอบแรก
+  client.user.setPresence({
+    activities: [{ name: `${statuses[statusIndex]} | V${pkg.version}`, type: 4 }],
+    status: "online",
+  });
+
+  statusIndex = (statusIndex + 1) % statuses.length;
+
+  // 👉 อัปเดต status ทุก 14 นาที 30 วินาที
+  setInterval(() => {
+    const status = statuses[statusIndex];
+    client.user.setPresence({
+      activities: [{ name: `${status} | V${pkg.version}`, type: 4 }],
+      status: "online",
+    });
+    statusIndex = (statusIndex + 1) % statuses.length;
+  }, 870000);
 });
 
 // คำสั่ง /เมนูตอนนี้
