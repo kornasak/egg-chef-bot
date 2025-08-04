@@ -29,9 +29,9 @@ client.once("ready", async () => {
   console.log(`🤖 Logged in as ${client.user.tag}`);
 
   // ตั้งเวลาส่งข้อความตามมื้อ
-  cron.schedule("0 7 * * *", () => sendMeal("เช้า"));
-  cron.schedule("40 11 * * *", () => sendMeal("กลางวัน"));
-  cron.schedule("0 18 * * *", () => sendMeal("เย็น"));
+  cron.schedule("0 0 * * *", () => sendMeal("เช้า"));
+  cron.schedule("45 7 * * *", () => sendMeal("กลางวัน"));
+  cron.schedule("0 11 * * *", () => sendMeal("เย็น"));
 
   // ตั้ง status บอท
   const statuses = [
