@@ -41,11 +41,11 @@ client.once("ready", () => {
   console.log(`🤖 Logged in as ${client.user.tag}`);
   setInterval(() => {
     const now = new Date();
-    for (const { hour } of schedule) {
+    for (const { hour, label } of schedule) {
       if (now.getHours() === hour && now.getMinutes() === 0) {
         const channel = client.channels.cache.get(process.env.CHANNEL_ID);
         if (channel) {
-          channel.send(getMealMessage());
+          channel.send(getMealMessage(label));
         }
       }
     }
