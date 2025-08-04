@@ -52,7 +52,7 @@ await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), {
 
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
-  if (interaction.commandName === "เมนูตอนนี้") {
+  if (interaction.commandName === "suggest") {
     await interaction.reply(getMealMessage());
   }
 });
