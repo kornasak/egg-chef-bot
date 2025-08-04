@@ -28,13 +28,13 @@ function getMealMessage(mealType) {
 🌙 **มื้อเย็น:** ${getRandom(dinner)} + เครื่องดื่ม: ${getRandom(drinks)}
 🤒 ถ้าไม่ค่อยสบาย แนะนำ: ${getRandom(sickMenus)}
 `;
+  }
 }
 
-// ส่งอัตโนมัติตามเวลา (7:00, 12:00, 18:00)
 const schedule = [
   { hour: 7, label: "เช้า" },
   { hour: 11, label: "กลางวัน" },
-  { hour: 18, label: "เย็น" }
+  { hour: 18, label: "เย็น" },
 ];
 
 client.once("ready", async () => {
@@ -52,7 +52,6 @@ client.once("ready", async () => {
   const statuses = ["/suggest", "หิวเมื่อไหร่… หัวไข่จัดให้", "อยู่บ้านไม่รู้จะกินอะไร เรียกหัวไข่สิ!", "ทุกมื้อคือภารกิจ… ของหัวไข่"];
   let statusIndex = 0;
 
-  // แสดง status ทันทีรอบแรก
   client.user.setPresence({
     activities: [{ name: `${statuses[statusIndex]} | V${pkg.version}`, type: 4 }],
     status: "online",
@@ -60,7 +59,6 @@ client.once("ready", async () => {
 
   statusIndex = (statusIndex + 1) % statuses.length;
 
-  // 👉 อัปเดต status ทุก 14 นาที 30 วินาที
   setInterval(() => {
     const status = statuses[statusIndex];
     client.user.setPresence({
@@ -71,16 +69,6 @@ client.once("ready", async () => {
   }, 870000);
 });
 
-// คำสั่ง /เมนูตอนนี้
-const mealCommand = new SlashCommandBuilder()
-  .setName("suggest")
-  .setDescription("แนะนำเมนูอาหารสำหรับวันนี้แบบครบทุกมื้อ");
-
-const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
-await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), {
-  body: [mealCommand.toJSON()],
-});
-
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
   if (interaction.commandName === "suggest") {
@@ -88,5 +76,18 @@ client.on("interactionCreate", async (interaction) => {
   }
 });
 
-keepAlive();
-client.login(process.env.DISCORD_TOKEN);
+async function main() {
+  const mealCommand = new SlashCommandBuilder()
+    .setName("suggest")
+    .setDescription("แนะนำเมนูอาหารสำหรับวันนี้แบบครบทุกมื้อ");
+
+  const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
+  await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), {
+    body: [mealCommand.toJSON()],
+  });
+
+  keepAlive();
+  client.login(process.env.DISCORD_TOKEN);
+}
+
+main();
