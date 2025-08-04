@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import cron from "node-cron";
 import { keepAlive } from "./keepAlive.js";
 import { getMealMessage } from "./menu.js";
-import pkg from "./package.json" assert { type: "json" };
+import pkg from "./package.json" with { type: "json" };
 
 dotenv.config();
 
@@ -30,7 +30,7 @@ client.once("ready", async () => {
 
   // ตั้งเวลาส่งข้อความตามมื้อ
   cron.schedule("0 7 * * *", () => sendMeal("เช้า"));
-  cron.schedule("0 12 * * *", () => sendMeal("กลางวัน"));
+  cron.schedule("0 11 35 * *", () => sendMeal("กลางวัน"));
   cron.schedule("0 18 * * *", () => sendMeal("เย็น"));
 
   // ตั้ง status บอท
