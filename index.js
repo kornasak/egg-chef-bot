@@ -29,9 +29,18 @@ client.once("ready", async () => {
   console.log(`🤖 Logged in as ${client.user.tag}`);
 
   // ตั้งเวลาส่งข้อความตามมื้อ
-  cron.schedule("0 0 * * *", () => sendMeal("เช้า"));
-  cron.schedule("45 7 * * *", () => sendMeal("กลางวัน"));
-  cron.schedule("0 11 * * *", () => sendMeal("เย็น"));
+  cron.schedule("0 0 * * *", () => {
+    console.log("Trigger เช้า:", new Date().toISOString());
+    sendMeal("เช้า");
+  });
+  cron.schedule("45 7 * * *", () => {
+    console.log("Trigger กลางวัน:", new Date().toISOString());
+    sendMeal("กลางวัน");
+  });
+  cron.schedule("0 11 * * *", () => {
+    console.log("Trigger เย็น:", new Date().toISOString());
+    sendMeal("เย็น");
+  });
 
   // ตั้ง status บอท
   const statuses = [
