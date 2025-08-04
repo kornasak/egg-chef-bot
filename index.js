@@ -37,7 +37,7 @@ const schedule = [
   { hour: 18, label: "เย็น" }
 ];
 
-client.once("ready", () => {
+client.once("ready", async () => {
   console.log(`🤖 Logged in as ${client.user.tag}`);
   const channel = await client.channels.fetch(process.env.CHANNEL_ID);
   if (channel) {
