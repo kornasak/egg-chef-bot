@@ -39,17 +39,15 @@ const schedule = [
 
 client.once("ready", () => {
   console.log(`🤖 Logged in as ${client.user.tag}`);
-  setInterval(() => {
+  const channel = await client.channels.fetch(process.env.CHANNEL_ID);
+  if (channel) {
     const now = new Date();
     for (const { hour, label } of schedule) {
-      if (now.getHours() === hour && now.getMinutes() === 0) {
-        const channel = client.channels.cache.get(process.env.CHANNEL_ID);
-        if (channel) {
-          channel.send(getMealMessage(label));
-        }
+      if (now.getHours() === hour) {
+        channel.send(getMealMessage(label));
       }
     }
-  }, 60 * 1000); // check every minute
+  }
 
   const statuses = ["/suggest", "หิวเมื่อไหร่… หัวไข่จัดให้", "อยู่บ้านไม่รู้จะกินอะไร เรียกหัวไข่สิ!", "ทุกมื้อคือภารกิจ… ของหัวไข่"];
   let statusIndex = 0;
