@@ -33,7 +33,7 @@ client.once("ready", async () => {
     console.log("Trigger เช้า:", new Date().toISOString());
     sendMeal("เช้า");
   });
-  cron.schedule("55 7 * * *", () => {
+  cron.schedule("0 5 * * *", () => {
     console.log("Trigger กลางวัน:", new Date().toISOString());
     sendMeal("กลางวัน");
   });
