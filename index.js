@@ -10,13 +10,24 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-function getMealMessage() {
-  return `
+function getMealMessage(mealType) {
+  switch (mealType) {
+    case "เช้า":
+      return `🍽️ **มื้อเช้า:** ${getRandom(breakfast)} + เครื่องดื่ม: ${getRandom(drinks)}
+🤒 ถ้าไม่ค่อยสบาย แนะนำ: ${getRandom(sickMenus)}`;
+    case "กลางวัน":
+      return `🌞 **มื้อกลางวัน:** ${getRandom(lunch)} + เครื่องดื่ม: ${getRandom(drinks)}
+🤒 ถ้าไม่ค่อยสบาย แนะนำ: ${getRandom(sickMenus)}`;
+    case "เย็น":
+      return `🌙 **มื้อเย็น:** ${getRandom(dinner)} + เครื่องดื่ม: ${getRandom(drinks)}
+🤒 ถ้าไม่ค่อยสบาย แนะนำ: ${getRandom(sickMenus)}`;
+    default:
+      return `
 🍽️ **มื้อเช้า:** ${getRandom(breakfast)} + เครื่องดื่ม: ${getRandom(drinks)}
 🌞 **มื้อกลางวัน:** ${getRandom(lunch)} + เครื่องดื่ม: ${getRandom(drinks)}
 🌙 **มื้อเย็น:** ${getRandom(dinner)} + เครื่องดื่ม: ${getRandom(drinks)}
 🤒 ถ้าไม่ค่อยสบาย แนะนำ: ${getRandom(sickMenus)}
-  `;
+`;
 }
 
 // ส่งอัตโนมัติตามเวลา (7:00, 12:00, 18:00)
