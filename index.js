@@ -1,57 +1,61 @@
-import { keepAlive } from "./keepAlive.js";
-import { Client, GatewayIntentBits, Collection } from "discord.js";
+import { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } from "discord.js";
 import dotenv from "dotenv";
-import fs from "fs";
-import path from "path";
-import pkg from "./package.json" with { type: "json" };
+import { keepAlive } from "./keepAlive.js";
+import { breakfast, lunch, dinner, drinks, sickMenus } from "./menu.js";
 
 dotenv.config();
 
-keepAlive();
-
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
-client.commands = new Collection();
-const commandFiles = fs.readdirSync("./commands").filter(file => file.endsWith(".js"));
-for (const file of commandFiles) {
-  const command = await import(`./commands/${file}`);
-  client.commands.set(command.default.data.name, command.default);
+const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+function getMealMessage() {
+  return `
+🍽️ **มื้อเช้า:** ${getRandom(breakfast)} + เครื่องดื่ม: ${getRandom(drinks)}
+🌞 **มื้อกลางวัน:** ${getRandom(lunch)} + เครื่องดื่ม: ${getRandom(drinks)}
+🌙 **มื้อเย็น:** ${getRandom(dinner)} + เครื่องดื่ม: ${getRandom(drinks)}
+🤒 ถ้าไม่ค่อยสบาย แนะนำ: ${getRandom(sickMenus)}
+  `;
 }
 
-// ส่งเมนูอัตโนมัติตามเวลา
-import schedule from "node-schedule";
-import { getMenuText } from "./commands/menu.js";
+// ส่งอัตโนมัติตามเวลา (7:00, 12:00, 18:00)
+const schedule = [
+  { hour: 7, label: "เช้า" },
+  { hour: 12, label: "กลางวัน" },
+  { hour: 18, label: "เย็น" }
+];
 
-// ใส่ ID ของช่องที่ต้องการให้ส่งเมนู
-const CHANNEL_ID = process.env.CHANNEL_ID;
+client.once("ready", () => {
+  console.log(`🤖 Logged in as ${client.user.tag}`);
+  setInterval(() => {
+    const now = new Date();
+    for (const { hour } of schedule) {
+      if (now.getHours() === hour && now.getMinutes() === 0) {
+        const channel = client.channels.cache.get(process.env.CHANNEL_ID);
+        if (channel) {
+          channel.send(getMealMessage());
+        }
+      }
+    }
+  }, 60 * 1000); // check every minute
+});
 
-const sendMeal = async (mealTime) => {
-  const channel = await client.channels.fetch(CHANNEL_ID);
-  if (!channel) return;
-  const menu = getMenuText(mealTime);
-  channel.send(menu);
-};
+// คำสั่ง /เมนูตอนนี้
+const mealCommand = new SlashCommandBuilder()
+  .setName("เมนูตอนนี้")
+  .setDescription("แนะนำเมนูอาหารสำหรับวันนี้แบบครบทุกมื้อ");
 
-// ตั้งเวลา: 07:00, 12:00, 18:00
-schedule.scheduleJob("0 7 * * *", () => sendMeal("เช้า"));
-schedule.scheduleJob("0 12 * * *", () => sendMeal("กลางวัน"));
-schedule.scheduleJob("0 18 * * *", () => sendMeal("เย็น"));
+const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
+await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), {
+  body: [mealCommand.toJSON()],
+});
 
-// สั่งงานคำสั่ง
-client.on("interactionCreate", async interaction => {
+client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
-  const command = client.commands.get(interaction.commandName);
-  if (!command) return;
-  try {
-    await command.execute(interaction);
-  } catch (error) {
-    console.error(error);
-    await interaction.reply({ content: "มีบางอย่างผิดพลาด!", ephemeral: true });
+  if (interaction.commandName === "เมนูตอนนี้") {
+    await interaction.reply(getMealMessage());
   }
 });
 
-client.once("ready", () => {
-  console.log(`Logged in as ${client.user.tag}`);
-});
-
-client.login(process.env.TOKEN);
+keepAlive();
+client.login(process.env.DISCORD_TOKEN);
