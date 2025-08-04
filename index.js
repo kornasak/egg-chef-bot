@@ -22,7 +22,7 @@ function getMealMessage() {
 // ส่งอัตโนมัติตามเวลา (7:00, 12:00, 18:00)
 const schedule = [
   { hour: 7, label: "เช้า" },
-  { hour: 12, label: "กลางวัน" },
+  { hour: 11, label: "กลางวัน" },
   { hour: 18, label: "เย็น" }
 ];
 
