@@ -1,9 +1,19 @@
-import { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } from "discord.js";
+import {
+  Client,
+  GatewayIntentBits,
+  REST,
+  Routes,
+  SlashCommandBuilder,
+} from "discord.js";
 import dotenv from "dotenv";
-import cron from "node-cron";
+// import cron from "node-cron";
 import { keepAlive } from "./keepAlive.js";
 import { getMealMessage } from "./menu.js";
-import pkg from "./package.json" with { type: "json" };
+import fs from "fs";
+
+const pkg = JSON.parse(
+  fs.readFileSync(new URL("./package.json", import.meta.url), "utf-8")
+);
 
 dotenv.config();
 
@@ -47,19 +57,23 @@ client.once("ready", async () => {
     "/suggest",
     "หิวเมื่อไหร่… หัวไข่จัดให้",
     "อยู่บ้านไม่รู้จะกินอะไร เรียกหัวไข่สิ!",
-    "ทุกมื้อคือภารกิจ… ของหัวไข่"
+    "ทุกมื้อคือภารกิจ… ของหัวไข่",
   ];
   let statusIndex = 0;
 
   client.user.setPresence({
-    activities: [{ name: `${statuses[statusIndex]} | V${pkg.version}`, type: 4 }],
+    activities: [
+      { name: `${statuses[statusIndex]} | V${pkg.version}`, type: 4 },
+    ],
     status: "online",
   });
 
   setInterval(() => {
     statusIndex = (statusIndex + 1) % statuses.length;
     client.user.setPresence({
-      activities: [{ name: `${statuses[statusIndex]} | V${pkg.version}`, type: 4 }],
+      activities: [
+        { name: `${statuses[statusIndex]} | V${pkg.version}`, type: 4 },
+      ],
       status: "online",
     });
   }, 870000); // ทุก 14 นาที 30 วินาที
